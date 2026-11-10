@@ -8,7 +8,6 @@
 
 # Live inventory, credentials, and generated VPN client/server configurations.
 /ansible/inventories/production/
-/secrets/
 /credentials/
 /backups/
 /artifacts/
@@ -35,6 +34,22 @@ id_ed25519*
 *.pcap
 *.pcapng
 *.log
+
+# secrets/: only README.md and SOPS-encrypted files are tracked (docs/SECRETS.md).
+# Everything else is ignored; plaintext, decrypted output, and keys stay ignored
+# even when they also match an allowed pattern.
+/secrets/**
+!/secrets/**/
+!/secrets/README.md
+!/secrets/**/*.sops.yaml
+!/secrets/**/*.sops.yml
+/secrets/**/*.plain
+/secrets/**/*.plain.*
+/secrets/**/*.decrypted
+/secrets/**/*.decrypted.*
+/secrets/**/*.agekey
+/secrets/**/keys.txt
+/secrets/**/.encrypt.*/
 
 # Tool environments and build output.
 .venv/

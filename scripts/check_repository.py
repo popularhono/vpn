@@ -28,12 +28,24 @@ PRIVATE_PATTERNS = (
     "*.zip", "*.tar", "*.gz", "*.tgz", "*.bz2", "*.xz", "*.7z", "*.rar",
 )
 ACTION_REF = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_./-]+@[0-9a-f]{40}")
+# Узкие исключения из запрета каталога secrets: README, зашифрованные SOPS-файлы
+# (содержимое проверяет scripts/secrets/check_sops.py) и инструменты SOPS.
+SECRETS_README = "secrets/README.md"
+SOPS_ENCRYPTED_PATH = re.compile(r"secrets/(?:[^/]+/)*[^/]+\.sops\.ya?ml")
+SECRETS_TOOLING = ("scripts", "secrets")
 
 
 def private_path(path: PurePosixPath) -> bool:
     parts = tuple(part.lower() for part in path.parts)
     name = parts[-1]
-    if name in PRIVATE_NAMES or PRIVATE_DIRECTORIES.intersection(parts[:-1]):
+    directories = parts[:-1]
+    if path.parts[:1] == ("secrets",):
+        if str(path) != SECRETS_README and not SOPS_ENCRYPTED_PATH.fullmatch(str(path)):
+            return True
+        directories = directories[1:]
+    elif path.parts[:2] == SECRETS_TOOLING and len(path.parts) > 2:
+        directories = directories[:1] + directories[2:]
+    if name in PRIVATE_NAMES or PRIVATE_DIRECTORIES.intersection(directories):
         return True
     if name == ".env" or (name.startswith(".env.") and name != ".env.example"):
         return True

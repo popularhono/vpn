@@ -1,0 +1,9 @@
+# Правила SOPS для зашифрованных файлов secrets/**/*.sops.yaml и *.sops.yml.
+#
+# Приватный ключ age здесь не хранится и никогда не добавляется в репозиторий.
+# Публичный recipient намеренно не указан: scripts/secrets/encrypt.sh передаёт
+# его явно через --age "$SOPS_AGE_RECIPIENT". Без явного --age SOPS завершится
+# ошибкой (пустая группа ключей) и ничего не зашифрует на случайный ключ.
+# Подробности — docs/SECRETS.md.
+creation_rules:
+  - path_regex: ^secrets/(?:[^/]+/)*[^/]+\.sops\.ya?ml$
